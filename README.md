@@ -27,5 +27,7 @@ https://github.com/jeromeza/blog.example.com.git
 
 You can also stress test your cluster and the HPA component:
 
-```watch -n1 "kubectl get hpa ; echo ; kubectl get deployment ; echo ; kubectl get pod ; echo ; kubectl top pod"```
+1.) Watching the load  
+```watch -n1 "kubectl get hpa ; echo ; kubectl get deployment ; echo ; kubectl get pod ; echo ; kubectl top pod"```  
+2.) Creating the load  
 ```kubectl run -i --tty load-generator --rm --image=busybox --restart=Never -- /bin/sh -c 'echo "192.168.2.9 blog.example.com" >> /etc/hosts; while sleep 0.01 ; do wget -q -O- http://blog.example.com:8081/funwithmath.php; done'```
