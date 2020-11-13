@@ -1,0 +1,5 @@
+Image: "webdevops/php-apache:7.4"
+Fqdn: "blog.example.com"
+FqdnSafe: "blog-example-com"
+Repo: "http://gitlab.example.com/root/blog.example.com.git"
+GitPath: "/app"

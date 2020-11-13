@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "{{ .Values.FqdnSafe }}"
+spec:
+  rules:
+  - host: "{{ .Values.Fqdn }}"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: "{{ .Values.FqdnSafe }}"
+            port:
+              number: 80

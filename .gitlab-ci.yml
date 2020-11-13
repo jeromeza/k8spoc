@@ -1,0 +1,21 @@
+stages:
+- deploy
+BPS Site Deploy:
+    stage: deploy
+    image: docker:latest
+    variables:
+        DOCKER_HOST: tcp://192.168.2.9:2375
+    script:
+    # INSTALL GIT AND ADD GRAB SITE REPO     
+    - FQDNSAFE=$(echo $FQDN | tr "." -)
+    - echo "192.168.2.9 gitlab.example.com" > /etc/hosts
+    - apk add git
+    - git clone http://gitlab.example.com/root/k8spoc.git
+    # INSTALL HELM AND KUBECTL SO WE CAN ADD OUR HELM CHART + DEPLOY 
+    - cd k8spoc ; chmod +x kubectl ; chmod +x helm
+    # DEPLOY NAMESPACE
+    - ./kubectl --server=https://192.168.2.9:52265 --kubeconfig=./config create namespace bps || echo true
+    # UNINSTALL OLD CHART + REMOVE OLD SITE
+    - ./helm uninstall $FQDNSAFE --kubeconfig ./config --kube-apiserver https://192.168.2.9:52265 || echo true
+    # INSTALL NEW CHART AND NEW SITE
+    - ./helm install $FQDNSAFE bps_chart/ --kubeconfig ./config --kube-apiserver https://192.168.2.9:52265 --set Image=$IMAGE,Fqdn=$FQDN,FqdnSafe=$FQDNSAFE,Repo=$REPO || echo true

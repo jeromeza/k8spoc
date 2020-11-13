@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: "{{ .Values.Fqdn }}"
+  name: "{{ .Values.FqdnSafe }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{ .Values.Fqdn }}"
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.Fqdn }}"
+    spec:
+      volumes:
+      - name: shared-data
+        emptyDir: {}
+
+      containers:
+      - name: "{{ .Values.FqdnSafe }}"
+        image: "{{ .Values.Image }}"
+        command: ['sh', '-c', 'echo "RewriteEngine On" >> /opt/docker/etc/httpd/vhost.conf ; /opt/docker/bin/entrypoint.sh supervisord']
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+        volumeMounts:
+        - name: shared-data
+          mountPath: "{{ .Values.GitPath }}"
+
+      initContainers:
+      - name: init
+        image: alpine
+        command: ['sh', '-c', 'echo "192.168.2.9 gitlab.example.com" >> /etc/hosts ; apk add git ; git clone {{ .Values.Repo }} {{ .Values.Fqdn }} ; cp -rT {{ .Values.Fqdn }} {{ .Values.GitPath }}']
+        volumeMounts:
+        - name: shared-data
+          mountPath: "{{ .Values.GitPath }}"
